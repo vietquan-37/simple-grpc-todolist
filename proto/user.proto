@@ -1,0 +1,12 @@
+syntax="proto3";
+package pb;
+option go_package = "github.com/vietquan-37/todo-list/pb";
+
+message User{
+ 
+   string email=1;
+   string phone_number=2;
+   string full_name=3;
+   string role=4;
+
+}

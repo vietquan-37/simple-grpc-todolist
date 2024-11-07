@@ -1,0 +1,10 @@
+syntax="proto3";
+package pb;
+import "rpc_create_user.proto";
+option go_package = "github.com/vietquan-37/todo-list/pb";
+
+service TodoList{
+    rpc CreateUser(CreateUserRequest) returns(CreateUserResponse){
+
+    }
+}
