@@ -1,12 +1,40 @@
 syntax="proto3";
 package pb;
+
 option go_package = "github.com/vietquan-37/todo-list/pb";
 
-message User{
- 
+message UserResponse{
    string email=1;
    string phone_number=2;
    string full_name=3;
    string role=4;
+}
+message UserListResponse{
+   repeated UserResponse users =1;
+   int64 totalPage=2;
+   int64 pageNumber=3;
+   int64 pageSize=4;
 
+}
+message DeleteUserRequest {
+   int64 id = 1;  
+}
+message CreateUserRequest{
+   string email=1;
+   string password=2;
+   string phone_number=3;
+   string full_name=4;
+}   
+message DeleteUserResponse {
+  string message = 1;   
+}
+message Pagination{
+   string fullName=1;
+   int64 pageNumber=2;
+   int64 pageSize=3;
+}
+service TodoList{
+   rpc CreateUser(CreateUserRequest) returns(UserResponse){}
+   rpc DeleteUser(DeleteUserRequest)returns(DeleteUserResponse){}
+   rpc GetAllUser(Pagination) returns(UserListResponse){}
 }

@@ -2,16 +2,16 @@ package handler
 
 import (
 	"github.com/vietquan-37/todo-list/pb"
-	"github.com/vietquan-37/todo-list/pkg/v1/usecase/interfaces"
+	"github.com/vietquan-37/todo-list/pkg/v1/repository/interfaces"
 )
 
 type Server struct {
 	pb.UnimplementedTodoListServer
-	interfaces.UserUseCase
+	Repo interfaces.UserRepo
 }
 
-func NewServer(userUseCase interfaces.UserUseCase) *Server {
+func NewServer(repo interfaces.UserRepo) *Server {
 	return &Server{
-		UserUseCase: userUseCase,
+		Repo: repo,
 	}
 }

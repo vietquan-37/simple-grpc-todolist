@@ -12,8 +12,8 @@ import (
 	"github.com/vietquan-37/todo-list/pb" // Import your protobuf package
 	"github.com/vietquan-37/todo-list/pkg/v1/handler"
 	"github.com/vietquan-37/todo-list/pkg/v1/repository"
-	"github.com/vietquan-37/todo-list/pkg/v1/usecase"
-	"github.com/vietquan-37/todo-list/pkg/v1/usecase/interfaces"
+	"github.com/vietquan-37/todo-list/pkg/v1/repository/interfaces"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"gorm.io/gorm"
@@ -41,9 +41,8 @@ func main() {
 		log.Fatalf("Failed to serve: %v", err)
 	}
 }
-func initUserServer(db *gorm.DB) interfaces.UserUseCase {
-	userRepo := repository.NewUserRepo(db)
-	return usecase.NewUserCase(userRepo)
+func initUserServer(db *gorm.DB) interfaces.UserRepo {
+	return repository.NewUserRepo(db)
 }
 func migrations(db *gorm.DB) {
 	err := db.AutoMigrate(&model.User{}, &model.Task{}, &model.Session{}, &model.VerifyEmail{})

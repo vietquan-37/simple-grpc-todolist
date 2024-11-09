@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v4.23.4
-// source: service_todolist.proto
+// source: user.proto
 
 package pb
 
@@ -20,13 +20,17 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	TodoList_CreateUser_FullMethodName = "/pb.TodoList/CreateUser"
+	TodoList_DeleteUser_FullMethodName = "/pb.TodoList/DeleteUser"
+	TodoList_GetAllUser_FullMethodName = "/pb.TodoList/GetAllUser"
 )
 
 // TodoListClient is the client API for TodoList service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TodoListClient interface {
-	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
+	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*UserResponse, error)
+	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error)
+	GetAllUser(ctx context.Context, in *Pagination, opts ...grpc.CallOption) (*UserListResponse, error)
 }
 
 type todoListClient struct {
@@ -37,10 +41,30 @@ func NewTodoListClient(cc grpc.ClientConnInterface) TodoListClient {
 	return &todoListClient{cc}
 }
 
-func (c *todoListClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
+func (c *todoListClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateUserResponse)
+	out := new(UserResponse)
 	err := c.cc.Invoke(ctx, TodoList_CreateUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *todoListClient) DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteUserResponse)
+	err := c.cc.Invoke(ctx, TodoList_DeleteUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *todoListClient) GetAllUser(ctx context.Context, in *Pagination, opts ...grpc.CallOption) (*UserListResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UserListResponse)
+	err := c.cc.Invoke(ctx, TodoList_GetAllUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +75,9 @@ func (c *todoListClient) CreateUser(ctx context.Context, in *CreateUserRequest, 
 // All implementations must embed UnimplementedTodoListServer
 // for forward compatibility.
 type TodoListServer interface {
-	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
+	CreateUser(context.Context, *CreateUserRequest) (*UserResponse, error)
+	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
+	GetAllUser(context.Context, *Pagination) (*UserListResponse, error)
 	mustEmbedUnimplementedTodoListServer()
 }
 
@@ -62,8 +88,14 @@ type TodoListServer interface {
 // pointer dereference when methods are called.
 type UnimplementedTodoListServer struct{}
 
-func (UnimplementedTodoListServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
+func (UnimplementedTodoListServer) CreateUser(context.Context, *CreateUserRequest) (*UserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
+}
+func (UnimplementedTodoListServer) DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteUser not implemented")
+}
+func (UnimplementedTodoListServer) GetAllUser(context.Context, *Pagination) (*UserListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllUser not implemented")
 }
 func (UnimplementedTodoListServer) mustEmbedUnimplementedTodoListServer() {}
 func (UnimplementedTodoListServer) testEmbeddedByValue()                  {}
@@ -104,6 +136,42 @@ func _TodoList_CreateUser_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TodoList_DeleteUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TodoListServer).DeleteUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TodoList_DeleteUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TodoListServer).DeleteUser(ctx, req.(*DeleteUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TodoList_GetAllUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Pagination)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TodoListServer).GetAllUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TodoList_GetAllUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TodoListServer).GetAllUser(ctx, req.(*Pagination))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TodoList_ServiceDesc is the grpc.ServiceDesc for TodoList service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -115,7 +183,15 @@ var TodoList_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "CreateUser",
 			Handler:    _TodoList_CreateUser_Handler,
 		},
+		{
+			MethodName: "DeleteUser",
+			Handler:    _TodoList_DeleteUser_Handler,
+		},
+		{
+			MethodName: "GetAllUser",
+			Handler:    _TodoList_GetAllUser_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "service_todolist.proto",
+	Metadata: "user.proto",
 }
