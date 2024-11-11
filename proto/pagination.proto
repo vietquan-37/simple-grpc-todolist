@@ -1,0 +1,14 @@
+syntax="proto3";
+package pb;
+
+option go_package = "github.com/vietquan-37/todo-list/pb";
+message PaginationRequest{
+    string query=1;
+    int64 pageNumber=2;
+    int64 pageSize=3;
+}
+message PaginationResponse{
+    int64 totalPage=1;
+    int64 pageNumber=2;
+    int64 pageSize=3;
+}

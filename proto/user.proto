@@ -1,6 +1,6 @@
 syntax="proto3";
 package pb;
-
+import "pagination.proto";
 option go_package = "github.com/vietquan-37/todo-list/pb";
 
 message UserResponse{
@@ -11,9 +11,7 @@ message UserResponse{
 }
 message UserListResponse{
    repeated UserResponse users =1;
-   int64 totalPage=2;
-   int64 pageNumber=3;
-   int64 pageSize=4;
+  PaginationResponse page=2;
 
 }
 message DeleteUserRequest {
@@ -29,12 +27,17 @@ message DeleteUserResponse {
   string message = 1;   
 }
 message Pagination{
-   string fullName=1;
-   int64 pageNumber=2;
-   int64 pageSize=3;
+   PaginationRequest request=1;
+}
+message UserUpdateRequest{
+   int32 ID=1;
+   optional string password=2;
+   optional string phone_number=3;
+   optional string full_name=4;
 }
 service TodoList{
    rpc CreateUser(CreateUserRequest) returns(UserResponse){}
    rpc DeleteUser(DeleteUserRequest)returns(DeleteUserResponse){}
    rpc GetAllUser(Pagination) returns(UserListResponse){}
+   rpc UpdateUser(UserUpdateRequest) returns(UserResponse){}
 }

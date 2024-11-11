@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 
 	"github.com/vietquan-37/todo-list/pb"
 	"github.com/vietquan-37/todo-list/pkg/v1/val"
@@ -18,15 +19,11 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 	}
 	model := convertUser(req)
 
-	check, err := server.Repo.GetUserByEmail(req.GetEmail())
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error when retrieving user: %s", err)
-	}
-	if check != nil {
-		return nil, status.Errorf(codes.AlreadyExists, "email %s already register before", check.Email)
-	}
 	user, err := server.Repo.CreateUser(model)
 	if err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return nil, status.Errorf(codes.AlreadyExists, "email %s already register before", req.Email)
+		}
 		return nil, status.Errorf(codes.Internal, "error while creating user: %s", err)
 	}
 
@@ -36,8 +33,8 @@ func (server *Server) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest)
 	userId := req.GetId()
 	err := server.Repo.DeleteUser(int(userId))
 	if err != nil {
-		if err != gorm.ErrRecordNotFound {
-			return nil, status.Error(codes.NotFound, "user not found")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Errorf(codes.NotFound, "user with id %d not found", userId)
 		}
 		return nil, status.Errorf(codes.Internal, "error while deleting user: %s", err)
 	}
@@ -64,9 +61,38 @@ func validateCreateUserRequest(req *pb.CreateUserRequest) (violation []*errdetai
 	return violation
 }
 func (server *Server) GetAllUser(ctx context.Context, req *pb.Pagination) (*pb.UserListResponse, error) {
-	userList, err := server.Repo.GetAllUser(req.GetFullName(), req.GetPageNumber(), req.GetPageSize())
+	userList, err := server.Repo.GetAllUser(req.Request.GetQuery(), req.Request.GetPageNumber(), req.Request.GetPageSize())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error while retrieving users: %s", err)
 	}
 	return convertUserListResponse(userList), nil
 }
+func (server *Server) UpdateUser(ctx context.Context, req *pb.UserUpdateRequest) (*pb.UserResponse, error) {
+	userId := req.GetID()
+	model := convertUserUpdate(req)
+	user, err := server.Repo.UpdateUser(int(userId), model)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, status.Errorf(codes.NotFound, "user with id %d not found", userId)
+			}
+			return nil, status.Errorf(codes.Internal, "error while updating user: %s", err)
+		}
+	}
+	return convertUserResponse(*user), nil
+}
+
+// func validateUpdateUserRequest(req *pb.UserUpdateRequest) (violation []*errdetails.BadRequest_FieldViolation) {
+
+// 	if err := val.ValidatePassword(req.GetPassword()); err != nil {
+// 		violation = append(violation, ErrorResponse("password", err))
+// 	}
+// 	if err := val.ValidatePhoneNumber(req.GetPhoneNumber()); err != nil {
+// 		violation = append(violation, ErrorResponse("phone_number", err))
+// 	}
+// 	if err := val.ValidateFullname(req.GetFullName()); err != nil {
+// 		violation = append(violation, ErrorResponse("full_name", err))
+// 	}
+
+// 	return violation
+// }

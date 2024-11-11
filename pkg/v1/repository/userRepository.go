@@ -24,9 +24,12 @@ func (repo *UserRepo) CreateUser(user *model.User) (*model.User, error) {
 
 	return user, nil
 }
-func (repo *UserRepo) UpdateUser(user *model.User) error {
-	err := repo.DB.Model(&model.User{}).Where("id = ?", user.ID).Updates(user).Error
-	return err
+func (repo *UserRepo) UpdateUser(id int, user *model.User) (*model.User, error) {
+	err := repo.DB.Where("id = ?", id).Updates(user).Error
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 func (repo *UserRepo) GetUser(id int) (*model.User, error) {
@@ -37,9 +40,13 @@ func (repo *UserRepo) GetUser(id int) (*model.User, error) {
 	return &dbUser, err
 }
 func (repo *UserRepo) DeleteUser(id int) error {
-	err := repo.DB.Where("id = ?", id).Delete(&model.User{}).Error
-	return err
+	result := repo.DB.Where("id = ?", id).Delete(&model.User{})
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }
+
 func (repo *UserRepo) GetUserByEmail(email string) (*model.User, error) {
 	var dbUser model.User
 	err := repo.DB.Where("email = ?", email).First(&dbUser).Error

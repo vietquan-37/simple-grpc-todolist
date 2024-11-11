@@ -16,6 +16,13 @@ func convertUser(req *pb.CreateUserRequest) *model.User {
 		Role:        enum.User,
 	}
 }
+func convertUserUpdate(req *pb.UserUpdateRequest) *model.User {
+	return &model.User{
+		Password:    req.GetPassword(),
+		PhoneNumber: req.GetPhoneNumber(),
+		FullName:    req.GetFullName(),
+	}
+}
 func convertUserResponse(user model.User) *pb.UserResponse {
 	return &pb.UserResponse{
 		Email:       user.Email,
@@ -31,11 +38,13 @@ func convertUserListResponse(res *pagination.Result[model.User]) *pb.UserListRes
 		userResponse := convertUserResponse(user)
 		userResponses = append(userResponses, userResponse)
 	}
-
-	return &pb.UserListResponse{
+	pageResponse := &pb.PaginationResponse{
 		TotalPage:  res.TotalPage,
 		PageNumber: res.PageNumber,
 		PageSize:   res.PageSize,
-		Users:      userResponses,
+	}
+	return &pb.UserListResponse{
+		Page:  pageResponse,
+		Users: userResponses,
 	}
 }
