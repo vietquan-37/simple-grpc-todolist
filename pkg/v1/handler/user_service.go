@@ -73,11 +73,9 @@ func (server *Server) UpdateUser(ctx context.Context, req *pb.UserUpdateRequest)
 	user, err := server.Repo.UpdateUser(int(userId), model)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, status.Errorf(codes.NotFound, "user with id %d not found", userId)
-			}
-			return nil, status.Errorf(codes.Internal, "error while updating user: %s", err)
+			return nil, status.Errorf(codes.NotFound, "user with id %d not found", userId)
 		}
+		return nil, status.Errorf(codes.Internal, "error while updating user: %s", err)
 	}
 	return convertUserResponse(*user), nil
 }
