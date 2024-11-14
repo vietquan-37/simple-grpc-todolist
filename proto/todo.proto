@@ -1,7 +1,10 @@
 syntax="proto3";
 package pb;
+import "protovalidate/buf/validate/validate.proto";
 import "pagination.proto";
+import "google/protobuf/timestamp.proto";
 option go_package = "github.com/vietquan-37/todo-list/pb";
+
 
 message UserResponse{
    string email=1;
@@ -17,12 +20,19 @@ message UserListResponse{
 message DeleteUserRequest {
    int64 id = 1;  
 }
-message CreateUserRequest{
-   string email=1;
-   string password=2;
-   string phone_number=3;
-   string full_name=4;
-}   
+message CreateUserRequest {
+
+   string email = 1 [(validate.rules).string.email = true];
+
+ 
+   string password = 2 [(validate.rules).string.min_len = 6];
+
+  
+   string phone_number = 3 [(validate.rules).string.pattern = "^\\+?[0-9]{10,15}$"];
+
+ 
+   string full_name = 4 [(validate.rules).string.min_len = 1];
+}  
 message DeleteUserResponse {
   string message = 1;   
 }
@@ -42,11 +52,23 @@ message LoginResponse{
    string access_token=1;
    string refresh_token=2;
 }
-
+message CreateTaskRequest{
+   string task_name=1;
+   string description=2;
+   
+}
+message TaskResponse{
+   string task_name=1;
+   string desctiption=2;
+   string task_status=3;
+   google.protobuf.Timestamp created_at=4;
+   google.protobuf.Timestamp task_deadline=5;
+}
 service TodoList{
    rpc CreateUser(CreateUserRequest) returns(UserResponse){}
    rpc DeleteUser(DeleteUserRequest)returns(DeleteUserResponse){}
    rpc GetAllUser(Pagination) returns(UserListResponse){}
    rpc UpdateUser(UserUpdateRequest) returns(UserResponse){}
    rpc Login(LoginRequest)returns(LoginResponse){}
+   rpc CreateTask(CreateTaskRequest)returns(TaskResponse){}
 }

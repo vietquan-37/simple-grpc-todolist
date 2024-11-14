@@ -8,6 +8,7 @@ import (
 	"github.com/vietquan-37/todo-list/middleware"
 	"github.com/vietquan-37/todo-list/pb"
 	"github.com/vietquan-37/todo-list/pkg/v1/val"
+	"github.com/vietquan-37/todo-list/util"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -38,6 +39,13 @@ func (server *Server) UpdateUser(ctx context.Context, req *pb.UserUpdateRequest)
 	violation := validateUpdateUserRequest(req)
 	if violation != nil {
 		return nil, invalidArgumentError(violation)
+	}
+	if req.Password != nil {
+		hashPasword, err := util.HashedPassword(*req.Password)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "error while hashing password: %s", err)
+		}
+		req.Password = &hashPasword
 	}
 	model := convertUserUpdate(req)
 	user, err := server.Repo.UpdateUser(userIDInt, model)

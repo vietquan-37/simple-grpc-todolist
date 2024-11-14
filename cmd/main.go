@@ -33,8 +33,9 @@ func main() {
 	}
 	jwtSecret := "hehe"
 	jwtMaker, err := util.NewService(jwtSecret)
-	userUseCase := initUserServer(db)
-	server := handler.NewServer(userUseCase, *jwtMaker)
+	userRepo := initUserRepo(db)
+	taskRepo := initTaskRepo(db)
+	server := handler.NewServer(userRepo, taskRepo, *jwtMaker)
 
 	if err != nil {
 		log.Fatalf("Failed to create JwtMaker: %v", err)
@@ -53,8 +54,11 @@ func main() {
 		log.Fatalf("Failed to serve: %v", err)
 	}
 }
-func initUserServer(db *gorm.DB) interfaces.UserRepo {
+func initUserRepo(db *gorm.DB) interfaces.UserRepo {
 	return repository.NewUserRepo(db)
+}
+func initTaskRepo(db *gorm.DB) interfaces.TaskRepo {
+	return repository.NewTaskRepo(db)
 }
 func migrations(db *gorm.DB) {
 	err := db.AutoMigrate(&model.User{}, &model.Task{}, &model.Session{}, &model.VerifyEmail{})

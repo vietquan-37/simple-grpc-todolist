@@ -36,7 +36,8 @@ var publicMethods = map[string]struct{}{
 var methodRoles = map[string][]string{
 	"/pb.TodoList/DeleteUser": {"ADMIN"},
 	"/pb.TodoList/UpdateUser": {"USER", "ADMIN"},
-	"/pb.TodoList/DeleteTask": {"USER"},
+	"/pb.TodoList/GetAllUser": {"ADMIN"},
+	"/pb.TodoList/CreateTask": {"USER"},
 }
 
 func NewAuthInterceptor(validator Validator) (*authInterceptor, error) {

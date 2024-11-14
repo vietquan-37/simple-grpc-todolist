@@ -8,13 +8,15 @@ import (
 
 type Server struct {
 	pb.UnimplementedTodoListServer
-	Repo  interfaces.UserRepo
-	Token util.JwtMaker
+	Repo     interfaces.UserRepo
+	TaskRepo interfaces.TaskRepo
+	Token    util.JwtMaker
 }
 
-func NewServer(repo interfaces.UserRepo, token util.JwtMaker) *Server {
+func NewServer(repo interfaces.UserRepo, taskRepo interfaces.TaskRepo, token util.JwtMaker) *Server {
 	return &Server{
-		Repo:  repo,
-		Token: token,
+		Repo:     repo,
+		TaskRepo: taskRepo,
+		Token:    token,
 	}
 }
