@@ -30,14 +30,23 @@ message Pagination{
    PaginationRequest request=1;
 }
 message UserUpdateRequest{
-   int32 ID=1;
-   optional string password=2;
-   optional string phone_number=3;
-   optional string full_name=4;
+   optional string password=1;
+   optional string phone_number=2;
+   optional string full_name=3;
 }
+message LoginRequest{
+   string email=1;
+   string password=2;
+}
+message LoginResponse{
+   string access_token=1;
+   string refresh_token=2;
+}
+
 service TodoList{
    rpc CreateUser(CreateUserRequest) returns(UserResponse){}
    rpc DeleteUser(DeleteUserRequest)returns(DeleteUserResponse){}
    rpc GetAllUser(Pagination) returns(UserListResponse){}
    rpc UpdateUser(UserUpdateRequest) returns(UserResponse){}
+   rpc Login(LoginRequest)returns(LoginResponse){}
 }

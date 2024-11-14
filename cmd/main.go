@@ -6,6 +6,8 @@ import (
 	"net"
 
 	"github.com/vietquan-37/todo-list/internal/db"
+	"github.com/vietquan-37/todo-list/middleware"
+	"github.com/vietquan-37/todo-list/util"
 
 	"github.com/vietquan-37/todo-list/internal/model"
 
@@ -29,11 +31,21 @@ func main() {
 	if err != nil {
 		log.Fatalf("ERROR STARTING THE SERVER: %v", err)
 	}
-
+	jwtSecret := "hehe"
+	jwtMaker, err := util.NewService(jwtSecret)
 	userUseCase := initUserServer(db)
-	server := handler.NewServer(userUseCase)
+	server := handler.NewServer(userUseCase, *jwtMaker)
 
-	grpcServer := grpc.NewServer()
+	if err != nil {
+		log.Fatalf("Failed to create JwtMaker: %v", err)
+	}
+
+	authInterceptor, err := middleware.NewAuthInterceptor(jwtMaker)
+	if err != nil {
+		log.Fatalf("Failed to create AuthInterceptor: %v", err)
+	}
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(authInterceptor.UnaryAuthMiddleware))
 	pb.RegisterTodoListServer(grpcServer, server)
 	reflection.Register(grpcServer)
 	fmt.Println("Server is listening on port 5051...")
