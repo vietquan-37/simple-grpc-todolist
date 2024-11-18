@@ -22,17 +22,19 @@ import (
 )
 
 func main() {
-
-	db := db.DbConn()
+	config, err := util.LoadConfig("../")
+	if err != nil {
+		log.Fatalf("cannot load from configuration: %v", err)
+	}
+	db := db.DbConn(config.DBSource)
 
 	migrations(db)
 
-	lis, err := net.Listen("tcp", ":5051")
+	lis, err := net.Listen("tcp", config.GRPCAddress)
 	if err != nil {
 		log.Fatalf("ERROR STARTING THE SERVER: %v", err)
 	}
-	jwtSecret := "hehe"
-	jwtMaker, err := util.NewService(jwtSecret)
+	jwtMaker, err := util.NewService(config.SignatureSercret)
 	userRepo := initUserRepo(db)
 	taskRepo := initTaskRepo(db)
 	server := handler.NewServer(userRepo, taskRepo, *jwtMaker)

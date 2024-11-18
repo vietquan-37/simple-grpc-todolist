@@ -2,5 +2,5 @@ PHONY: run proto buf
 run:
 	@cd cmd && go run main.go
 buf: 
-	@buf generate
-
+	@if exist pb\*.go del /Q pb\*.go
+	buf generate

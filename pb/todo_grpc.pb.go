@@ -19,12 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TodoList_CreateUser_FullMethodName = "/pb.TodoList/CreateUser"
-	TodoList_DeleteUser_FullMethodName = "/pb.TodoList/DeleteUser"
-	TodoList_GetAllUser_FullMethodName = "/pb.TodoList/GetAllUser"
-	TodoList_UpdateUser_FullMethodName = "/pb.TodoList/UpdateUser"
-	TodoList_Login_FullMethodName      = "/pb.TodoList/Login"
-	TodoList_CreateTask_FullMethodName = "/pb.TodoList/CreateTask"
+	TodoList_CreateUser_FullMethodName     = "/pb.TodoList/CreateUser"
+	TodoList_DeleteUser_FullMethodName     = "/pb.TodoList/DeleteUser"
+	TodoList_GetAllUser_FullMethodName     = "/pb.TodoList/GetAllUser"
+	TodoList_UpdateUser_FullMethodName     = "/pb.TodoList/UpdateUser"
+	TodoList_Login_FullMethodName          = "/pb.TodoList/Login"
+	TodoList_CreateTask_FullMethodName     = "/pb.TodoList/CreateTask"
+	TodoList_GetAllUserTask_FullMethodName = "/pb.TodoList/GetAllUserTask"
+	TodoList_DeleteTask_FullMethodName     = "/pb.TodoList/DeleteTask"
+	TodoList_UpdateTask_FullMethodName     = "/pb.TodoList/UpdateTask"
 )
 
 // TodoListClient is the client API for TodoList service.
@@ -33,10 +36,13 @@ const (
 type TodoListClient interface {
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error)
-	GetAllUser(ctx context.Context, in *Pagination, opts ...grpc.CallOption) (*UserListResponse, error)
+	GetAllUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*UserListResponse, error)
 	UpdateUser(ctx context.Context, in *UserUpdateRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	CreateTask(ctx context.Context, in *CreateTaskRequest, opts ...grpc.CallOption) (*TaskResponse, error)
+	GetAllUserTask(ctx context.Context, in *GetTaskRequest, opts ...grpc.CallOption) (*TaskListResponse, error)
+	DeleteTask(ctx context.Context, in *DeleteTaskRequest, opts ...grpc.CallOption) (*DeleteTaskResponse, error)
+	UpdateTask(ctx context.Context, in *UpdateTaskRequest, opts ...grpc.CallOption) (*TaskResponse, error)
 }
 
 type todoListClient struct {
@@ -67,7 +73,7 @@ func (c *todoListClient) DeleteUser(ctx context.Context, in *DeleteUserRequest, 
 	return out, nil
 }
 
-func (c *todoListClient) GetAllUser(ctx context.Context, in *Pagination, opts ...grpc.CallOption) (*UserListResponse, error) {
+func (c *todoListClient) GetAllUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*UserListResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UserListResponse)
 	err := c.cc.Invoke(ctx, TodoList_GetAllUser_FullMethodName, in, out, cOpts...)
@@ -107,16 +113,49 @@ func (c *todoListClient) CreateTask(ctx context.Context, in *CreateTaskRequest, 
 	return out, nil
 }
 
+func (c *todoListClient) GetAllUserTask(ctx context.Context, in *GetTaskRequest, opts ...grpc.CallOption) (*TaskListResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TaskListResponse)
+	err := c.cc.Invoke(ctx, TodoList_GetAllUserTask_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *todoListClient) DeleteTask(ctx context.Context, in *DeleteTaskRequest, opts ...grpc.CallOption) (*DeleteTaskResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteTaskResponse)
+	err := c.cc.Invoke(ctx, TodoList_DeleteTask_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *todoListClient) UpdateTask(ctx context.Context, in *UpdateTaskRequest, opts ...grpc.CallOption) (*TaskResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TaskResponse)
+	err := c.cc.Invoke(ctx, TodoList_UpdateTask_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TodoListServer is the server API for TodoList service.
 // All implementations should embed UnimplementedTodoListServer
 // for forward compatibility.
 type TodoListServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*UserResponse, error)
 	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
-	GetAllUser(context.Context, *Pagination) (*UserListResponse, error)
+	GetAllUser(context.Context, *GetUserRequest) (*UserListResponse, error)
 	UpdateUser(context.Context, *UserUpdateRequest) (*UserResponse, error)
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	CreateTask(context.Context, *CreateTaskRequest) (*TaskResponse, error)
+	GetAllUserTask(context.Context, *GetTaskRequest) (*TaskListResponse, error)
+	DeleteTask(context.Context, *DeleteTaskRequest) (*DeleteTaskResponse, error)
+	UpdateTask(context.Context, *UpdateTaskRequest) (*TaskResponse, error)
 }
 
 // UnimplementedTodoListServer should be embedded to have
@@ -132,7 +171,7 @@ func (UnimplementedTodoListServer) CreateUser(context.Context, *CreateUserReques
 func (UnimplementedTodoListServer) DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteUser not implemented")
 }
-func (UnimplementedTodoListServer) GetAllUser(context.Context, *Pagination) (*UserListResponse, error) {
+func (UnimplementedTodoListServer) GetAllUser(context.Context, *GetUserRequest) (*UserListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllUser not implemented")
 }
 func (UnimplementedTodoListServer) UpdateUser(context.Context, *UserUpdateRequest) (*UserResponse, error) {
@@ -143,6 +182,15 @@ func (UnimplementedTodoListServer) Login(context.Context, *LoginRequest) (*Login
 }
 func (UnimplementedTodoListServer) CreateTask(context.Context, *CreateTaskRequest) (*TaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateTask not implemented")
+}
+func (UnimplementedTodoListServer) GetAllUserTask(context.Context, *GetTaskRequest) (*TaskListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllUserTask not implemented")
+}
+func (UnimplementedTodoListServer) DeleteTask(context.Context, *DeleteTaskRequest) (*DeleteTaskResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTask not implemented")
+}
+func (UnimplementedTodoListServer) UpdateTask(context.Context, *UpdateTaskRequest) (*TaskResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateTask not implemented")
 }
 func (UnimplementedTodoListServer) testEmbeddedByValue() {}
 
@@ -201,7 +249,7 @@ func _TodoList_DeleteUser_Handler(srv interface{}, ctx context.Context, dec func
 }
 
 func _TodoList_GetAllUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Pagination)
+	in := new(GetUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -213,7 +261,7 @@ func _TodoList_GetAllUser_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: TodoList_GetAllUser_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TodoListServer).GetAllUser(ctx, req.(*Pagination))
+		return srv.(TodoListServer).GetAllUser(ctx, req.(*GetUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -272,6 +320,60 @@ func _TodoList_CreateTask_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TodoList_GetAllUserTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTaskRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TodoListServer).GetAllUserTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TodoList_GetAllUserTask_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TodoListServer).GetAllUserTask(ctx, req.(*GetTaskRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TodoList_DeleteTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTaskRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TodoListServer).DeleteTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TodoList_DeleteTask_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TodoListServer).DeleteTask(ctx, req.(*DeleteTaskRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TodoList_UpdateTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTaskRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TodoListServer).UpdateTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TodoList_UpdateTask_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TodoListServer).UpdateTask(ctx, req.(*UpdateTaskRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TodoList_ServiceDesc is the grpc.ServiceDesc for TodoList service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -302,6 +404,18 @@ var TodoList_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateTask",
 			Handler:    _TodoList_CreateTask_Handler,
+		},
+		{
+			MethodName: "GetAllUserTask",
+			Handler:    _TodoList_GetAllUserTask_Handler,
+		},
+		{
+			MethodName: "DeleteTask",
+			Handler:    _TodoList_DeleteTask_Handler,
+		},
+		{
+			MethodName: "UpdateTask",
+			Handler:    _TodoList_UpdateTask_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

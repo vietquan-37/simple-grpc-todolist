@@ -3,9 +3,8 @@ package handler
 import (
 	"context"
 	"errors"
-	"strconv"
 
-	"github.com/vietquan-37/todo-list/middleware"
+	"github.com/bufbuild/protovalidate-go"
 	"github.com/vietquan-37/todo-list/pb"
 	"github.com/vietquan-37/todo-list/util"
 	"google.golang.org/grpc/codes"
@@ -13,26 +12,26 @@ import (
 	"gorm.io/gorm"
 )
 
-func (server *Server) GetAllUser(ctx context.Context, req *pb.Pagination) (*pb.UserListResponse, error) {
-	userList, err := server.Repo.GetAllUser(req.Request.GetQuery(), req.Request.GetPageNumber(), req.Request.GetPageSize())
+func (server *Server) GetAllUser(ctx context.Context, req *pb.GetUserRequest) (*pb.UserListResponse, error) {
+	userList, err := server.Repo.GetAllUser(req.GetQuery(), req.Request.GetPageNumber(), req.Request.GetPageSize())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error while retrieving users: %s", err)
 	}
 	return convertUserListResponse(userList), nil
 }
 func (server *Server) UpdateUser(ctx context.Context, req *pb.UserUpdateRequest) (*pb.UserResponse, error) {
-
-	userID, ok := ctx.Value(middleware.UserIDKey).(string)
-	if !ok {
-		return nil, status.Error(codes.Unauthenticated, "user ID not found in context")
-	}
-	userIDInt, err := strconv.Atoi(userID)
+	validator, err := protovalidate.New()
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid user ID format: %s", userID)
+		panic(err)
 	}
+	if err := validator.Validate(req); err != nil {
 
-	if !ok {
-		return nil, status.Error(codes.FailedPrecondition, "user id missing")
+		violation := ErrorResponses(err)
+		return nil, invalidArgumentError(violation)
+	}
+	userID, _, err := GetFromCtx(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	if req.Password != nil {
@@ -43,10 +42,10 @@ func (server *Server) UpdateUser(ctx context.Context, req *pb.UserUpdateRequest)
 		req.Password = &hashPasword
 	}
 	model := convertUserUpdate(req)
-	user, err := server.Repo.UpdateUser(userIDInt, model)
+	user, err := server.Repo.UpdateUser(userID, model)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Errorf(codes.NotFound, "user with id %d not found", userIDInt)
+			return nil, status.Errorf(codes.NotFound, "user with id %d not found", userID)
 		}
 		return nil, status.Errorf(codes.Internal, "error while updating user: %s", err)
 	}

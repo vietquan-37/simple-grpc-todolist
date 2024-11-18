@@ -7,10 +7,10 @@ import (
 	"gorm.io/gorm"
 )
 
-func DbConn() *gorm.DB {
+func DbConn(DbSource string) *gorm.DB {
 
 	db, err := gorm.Open(
-		postgres.Open("postgresql://postgres:12345@localhost:5431/todo_list?sslmode=disable"), &gorm.Config{TranslateError: true},
+		postgres.Open(DbSource), &gorm.Config{TranslateError: true},
 	)
 	if err != nil {
 		log.Fatalf("There was error connecting to the database: %v", err)

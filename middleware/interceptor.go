@@ -15,7 +15,7 @@ type contextKey string
 
 const (
 	UserIDKey = contextKey("user_id")
-	roleKey   = contextKey("role")
+	RoleKey   = contextKey("role")
 )
 
 // Validator interface to validate JWT token
@@ -34,10 +34,13 @@ var publicMethods = map[string]struct{}{
 }
 
 var methodRoles = map[string][]string{
-	"/pb.TodoList/DeleteUser": {"ADMIN"},
-	"/pb.TodoList/UpdateUser": {"USER", "ADMIN"},
-	"/pb.TodoList/GetAllUser": {"ADMIN"},
-	"/pb.TodoList/CreateTask": {"USER"},
+	"/pb.TodoList/DeleteUser":     {"ADMIN"},
+	"/pb.TodoList/UpdateUser":     {"USER", "ADMIN"},
+	"/pb.TodoList/GetAllUser":     {"ADMIN"},
+	"/pb.TodoList/CreateTask":     {"USER"},
+	"/pb.TodoList/GetAllUserTask": {"USER"},
+	"/pb.TodoList/DeleteTask":     {"USER"},
+	"/pb.TodoList/UpdateTask":     {"USER"},
 }
 
 func NewAuthInterceptor(validator Validator) (*authInterceptor, error) {
@@ -100,7 +103,7 @@ func (i *authInterceptor) UnaryAuthMiddleware(ctx context.Context, req any, info
 	}
 
 	ctx = context.WithValue(ctx, UserIDKey, userID)
-
+	ctx = context.WithValue(ctx, RoleKey, role)
 	if !i.isAuthorized(info.FullMethod, role) {
 		return nil, status.Error(codes.PermissionDenied, "access denied for the user role")
 	}
