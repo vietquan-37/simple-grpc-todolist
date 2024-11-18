@@ -7,9 +7,7 @@ import (
 
 	"github.com/vietquan-37/todo-list/middleware"
 	"github.com/vietquan-37/todo-list/pb"
-	"github.com/vietquan-37/todo-list/pkg/v1/val"
 	"github.com/vietquan-37/todo-list/util"
-	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -36,10 +34,7 @@ func (server *Server) UpdateUser(ctx context.Context, req *pb.UserUpdateRequest)
 	if !ok {
 		return nil, status.Error(codes.FailedPrecondition, "user id missing")
 	}
-	violation := validateUpdateUserRequest(req)
-	if violation != nil {
-		return nil, invalidArgumentError(violation)
-	}
+
 	if req.Password != nil {
 		hashPasword, err := util.HashedPassword(*req.Password)
 		if err != nil {
@@ -70,23 +65,4 @@ func (server *Server) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest)
 		Message: "Delete user successfully",
 	}, nil
 
-}
-func validateUpdateUserRequest(req *pb.UserUpdateRequest) (violation []*errdetails.BadRequest_FieldViolation) {
-	if req.Password != nil {
-		if err := val.ValidatePassword(req.GetPassword()); err != nil {
-			violation = append(violation, ErrorResponse("password", err))
-		}
-	}
-	if req.PhoneNumber != nil {
-		if err := val.ValidatePhoneNumber(req.GetPhoneNumber()); err != nil {
-			violation = append(violation, ErrorResponse("phone_number", err))
-		}
-	}
-	if req.FullName != nil {
-		if err := val.ValidateFullname(req.GetFullName()); err != nil {
-			violation = append(violation, ErrorResponse("full_name", err))
-		}
-	}
-
-	return violation
 }

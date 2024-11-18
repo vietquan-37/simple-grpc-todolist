@@ -5,18 +5,21 @@ import (
 	"errors"
 	"time"
 
+	"github.com/bufbuild/protovalidate-go"
 	"github.com/vietquan-37/todo-list/pb"
-	"github.com/vietquan-37/todo-list/pkg/v1/val"
 	"github.com/vietquan-37/todo-list/util"
-	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
 
 func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.UserResponse, error) {
-	violation := validateCreateUserRequest(req)
-	if violation != nil {
+	validator, err := protovalidate.New()
+	if err != nil {
+		panic(err)
+	}
+	if err := validator.Validate(req); err != nil {
+		violation := ErrorResponses(err)
 		return nil, invalidArgumentError(violation)
 	}
 	hashPasword, err := util.HashedPassword(req.Password)
@@ -35,24 +38,6 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 	}
 
 	return convertUserResponse(*user), nil
-}
-
-func validateCreateUserRequest(req *pb.CreateUserRequest) (violation []*errdetails.BadRequest_FieldViolation) {
-
-	if err := val.ValidateEmail(req.GetEmail()); err != nil {
-		violation = append(violation, ErrorResponse("email", err))
-	}
-	if err := val.ValidatePassword(req.GetPassword()); err != nil {
-		violation = append(violation, ErrorResponse("password", err))
-	}
-	if err := val.ValidatePhoneNumber(req.GetPhoneNumber()); err != nil {
-		violation = append(violation, ErrorResponse("phone_number", err))
-	}
-	if err := val.ValidateFullname(req.GetFullName()); err != nil {
-		violation = append(violation, ErrorResponse("full_name", err))
-	}
-
-	return violation
 }
 
 func (server *Server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {

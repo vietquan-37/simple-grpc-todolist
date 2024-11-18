@@ -1,6 +1,6 @@
 syntax="proto3";
 package pb;
-import "protovalidate/buf/validate/validate.proto";
+import "buf/validate/validate.proto";
 import "pagination.proto";
 import "google/protobuf/timestamp.proto";
 option go_package = "github.com/vietquan-37/todo-list/pb";
@@ -22,16 +22,16 @@ message DeleteUserRequest {
 }
 message CreateUserRequest {
 
-   string email = 1 [(validate.rules).string.email = true];
+   string email = 1 [(buf.validate.field).string.email = true];
 
  
-   string password = 2 [(validate.rules).string.min_len = 6];
+   string password = 2[(buf.validate.field).string.min_len = 3 ,(buf.validate.field).string.max_len = 16];
 
   
-   string phone_number = 3 [(validate.rules).string.pattern = "^\\+?[0-9]{10,15}$"];
+   string phone_number = 3 [(buf.validate.field).string.pattern = "^\\+?[0-9]{10,11}$"];;
 
  
-   string full_name = 4 [(validate.rules).string.min_len = 1];
+   string full_name = 4 [(buf.validate.field).string.min_len = 3];
 }  
 message DeleteUserResponse {
   string message = 1;   
