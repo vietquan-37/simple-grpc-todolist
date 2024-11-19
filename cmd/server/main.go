@@ -17,12 +17,12 @@ import (
 	"github.com/vietquan-37/todo-list/pkg/v1/repository/interfaces"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"gorm.io/gorm"
 )
 
 func main() {
-	config, err := util.LoadConfig("../")
+	config, err := util.LoadConfig("../../")
+
 	if err != nil {
 		log.Fatalf("cannot load from configuration: %v", err)
 	}
@@ -50,7 +50,7 @@ func main() {
 	grpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(authInterceptor.UnaryAuthMiddleware))
 	pb.RegisterTodoListServer(grpcServer, server)
-	reflection.Register(grpcServer)
+	// reflection.Register(grpcServer)
 	fmt.Println("Server is listening on port 5051...")
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)

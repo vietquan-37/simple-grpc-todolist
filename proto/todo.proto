@@ -44,9 +44,9 @@ message GetTaskRequest{
    PaginationRequest request=2;
 }
 message UserUpdateRequest{
-   optional string password=1 [(buf.validate.field).string.min_len = 3 ,(buf.validate.field).string.max_len = 16];
-   optional string phone_number=2 [(buf.validate.field).string.pattern = "^\\+?[0-9]{10,11}$"];
-   optional string full_name=3 [(buf.validate.field).string.min_len = 3];
+ optional string password=1 [(buf.validate.field).string.min_len = 3 ,(buf.validate.field).string.max_len = 16];
+   string phone_number=2 [(buf.validate.field).string.pattern = "^\\+?[0-9]{10,11}$"];
+   string full_name=3 [(buf.validate.field).string.min_len = 3];
 }
 message LoginRequest{
    string email=1;
@@ -69,10 +69,10 @@ enum Status {
 }
 message UpdateTaskRequest{
    int32 task_id=1;
-   optional string task_name=2[(buf.validate.field).string.min_len = 3 ,(buf.validate.field).string.max_len = 16];
-   optional string description=3[(buf.validate.field).string.min_len = 6 ,(buf.validate.field).string.max_len = 256];
-   optional Status status = 4 [
-        (buf.validate.field).enum = { in: [0, 1, 2] }
+ string task_name=2[(buf.validate.field).string.min_len = 3 ,(buf.validate.field).string.max_len = 16];
+ string description=3[(buf.validate.field).string.min_len = 6 ,(buf.validate.field).string.max_len = 256];
+ Status status = 4 [
+        (buf.validate.field).enum = {defined_only:true, in: [0, 1, 2] }
     ];
 }
 message TaskResponse{
