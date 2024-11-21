@@ -17,6 +17,7 @@ import (
 	"github.com/vietquan-37/todo-list/pkg/v1/repository/interfaces"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"gorm.io/gorm"
 )
 
@@ -50,7 +51,7 @@ func main() {
 	grpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(authInterceptor.UnaryAuthMiddleware))
 	pb.RegisterTodoListServer(grpcServer, server)
-	// reflection.Register(grpcServer)
+	reflection.Register(grpcServer)
 	fmt.Println("Server is listening on port 5051...")
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
@@ -63,7 +64,7 @@ func initTaskRepo(db *gorm.DB) interfaces.TaskRepo {
 	return repository.NewTaskRepo(db)
 }
 func migrations(db *gorm.DB) {
-	err := db.AutoMigrate(&model.User{}, &model.Task{}, &model.Session{}, &model.VerifyEmail{})
+	err := db.AutoMigrate(&model.User{}, &model.Task{})
 	if err != nil {
 		fmt.Println("Migration error:", err)
 	} else {

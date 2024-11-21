@@ -30,7 +30,7 @@ func main() {
 		TaskId:      2,
 		TaskName:    "Learn Grpc client",
 		Description: "I will learn to write grpc client now",
-		Status:      pb.Status(99),
+		Status:      pb.Status_COMPLETED,
 	})
 	if err != nil {
 		log.Fatalf("error while calling UpdateTask: %v", err)

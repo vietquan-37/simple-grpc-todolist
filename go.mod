@@ -5,6 +5,7 @@ go 1.23.1
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.34.2-20240920164238-5a7b106cbb87.2
 	github.com/bufbuild/protovalidate-go v0.7.2
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/spf13/viper v1.19.0
 	golang.org/x/crypto v0.26.0
@@ -17,6 +18,8 @@ require (
 
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/google/cel-go v0.21.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect

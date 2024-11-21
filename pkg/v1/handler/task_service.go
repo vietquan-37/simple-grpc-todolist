@@ -49,7 +49,7 @@ func (server *Server) GetAllUserTask(ctx context.Context, req *pb.GetTaskRequest
 	rsp := convertTaskListResponse(taskList)
 	return rsp, nil
 }
-func (server *Server) DeleteTask(ctx context.Context, req *pb.DeleteTaskRequest) (*pb.DeleteTaskResponse, error) {
+func (server *Server) DeleteTask(ctx context.Context, req *pb.DeleteTaskRequest) (*pb.CommonResponse, error) {
 	userId, _, err := GetFromCtx(ctx)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func (server *Server) DeleteTask(ctx context.Context, req *pb.DeleteTaskRequest)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error while deleting task: %v", err)
 	}
-	return &pb.DeleteTaskResponse{
+	return &pb.CommonResponse{
 		Message: "Delete task successfully",
 	}, nil
 }

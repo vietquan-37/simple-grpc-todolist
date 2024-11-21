@@ -51,7 +51,7 @@ func (server *Server) UpdateUser(ctx context.Context, req *pb.UserUpdateRequest)
 	}
 	return convertUserResponse(*user), nil
 }
-func (server *Server) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*pb.DeleteUserResponse, error) {
+func (server *Server) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*pb.CommonResponse, error) {
 	userId := req.GetId()
 	err := server.Repo.DeleteUser(int(userId))
 	if err != nil {
@@ -60,7 +60,7 @@ func (server *Server) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest)
 		}
 		return nil, status.Errorf(codes.Internal, "error while deleting user: %s", err)
 	}
-	return &pb.DeleteUserResponse{
+	return &pb.CommonResponse{
 		Message: "Delete user successfully",
 	}, nil
 

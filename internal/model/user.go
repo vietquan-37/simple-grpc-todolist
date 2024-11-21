@@ -7,13 +7,11 @@ import (
 
 type User struct {
 	gorm.Model
-	Email        string `gorm:"unique;not null"`
-	FullName     string
-	PhoneNumber  string
-	Password     string
-	Role         enum.Role
-	Verified     bool          `gorm:"default:false"`
-	Tasks        []Task        `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE;"`
-	VerifyEmails []VerifyEmail `gorm:"foreignKey:UserID"`
-	Sessions     []Session     `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE;"`
+	Email       string `gorm:"unique;not null"`
+	FullName    string
+	PhoneNumber string
+	Password    string
+	Role        enum.Role
+	Verified    bool   `gorm:"default:false"`
+	Tasks       []Task `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE;"`
 }

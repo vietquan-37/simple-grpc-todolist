@@ -26,15 +26,11 @@ message CreateUserRequest {
    string phone_number = 3 [(buf.validate.field).string.pattern = "^\\+?[0-9]{10,11}$"];
    string full_name = 4 [(buf.validate.field).string.min_len = 3];
 }  
-message DeleteUserResponse {
-  string message = 1;   
-}
+
 message DeleteTaskRequest{
    int32 task_id=1;
 }
-message DeleteTaskResponse{
-   string message =1;
-}
+
 message GetUserRequest{
    string query=1;
    PaginationRequest request=2;
@@ -86,14 +82,26 @@ message TaskListResponse{
    repeated TaskResponse tasks =1;
    PaginationResponse page=2;
 }
+
+message CommonResponse{
+   string message=2;
+}
+message TokenRequest{
+   string refresh_token=1;
+}
+message RefreshTokenResponse{
+   string access_token=1;
+}
 service TodoList{
    rpc CreateUser(CreateUserRequest) returns(UserResponse){}
-   rpc DeleteUser(DeleteUserRequest)returns(DeleteUserResponse){}
+   rpc DeleteUser(DeleteUserRequest)returns( CommonResponse){}
    rpc GetAllUser(GetUserRequest) returns(UserListResponse){}
    rpc UpdateUser(UserUpdateRequest) returns(UserResponse){}
    rpc Login(LoginRequest)returns(LoginResponse){}
    rpc CreateTask(CreateTaskRequest)returns(TaskResponse){}
    rpc GetAllUserTask(GetTaskRequest)returns(TaskListResponse){}
-   rpc DeleteTask(DeleteTaskRequest)returns(DeleteTaskResponse){}
+   rpc DeleteTask(DeleteTaskRequest)returns(CommonResponse){}
    rpc UpdateTask(UpdateTaskRequest)returns(TaskResponse){}
+   rpc Logout(TokenRequest)returns(CommonResponse){}
+   rpc RefreshToken(TokenRequest)returns(RefreshTokenResponse){}
 }

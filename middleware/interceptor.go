@@ -29,8 +29,10 @@ type authInterceptor struct {
 }
 
 var publicMethods = map[string]struct{}{
-	"/pb.TodoList/Login":      {},
-	"/pb.TodoList/CreateUser": {},
+	"/pb.TodoList/Login":        {},
+	"/pb.TodoList/CreateUser":   {},
+	"/pb.TodoList/Logout":       {},
+	"/pb.TodoList/RefreshToken": {},
 }
 
 var methodRoles = map[string][]string{
