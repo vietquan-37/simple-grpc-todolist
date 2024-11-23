@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/vietquan-37/todo-list/pkg/v1/redis"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -76,7 +77,6 @@ func (i *authInterceptor) isAuthorized(method string, role string) bool {
 
 // The middleware for checking authentication and RBAC
 func (i *authInterceptor) UnaryAuthMiddleware(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
-	// Skip authentication for public methods like login and register
 	if i.isPublicMethod(info.FullMethod) {
 		return handler(ctx, req)
 	}
@@ -109,6 +109,9 @@ func (i *authInterceptor) UnaryAuthMiddleware(ctx context.Context, req any, info
 	if !i.isAuthorized(info.FullMethod, role) {
 		return nil, status.Error(codes.PermissionDenied, "access denied for the user role")
 	}
-
+	err = redis.GetByUserId(ctx, userID)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "UnAuthoried")
+	}
 	return handler(ctx, req)
 }

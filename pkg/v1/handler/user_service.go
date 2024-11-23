@@ -6,6 +6,7 @@ import (
 
 	"github.com/bufbuild/protovalidate-go"
 	"github.com/vietquan-37/todo-list/pb"
+	"github.com/vietquan-37/todo-list/pkg/v1/redis"
 	"github.com/vietquan-37/todo-list/util"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -59,6 +60,10 @@ func (server *Server) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest)
 			return nil, status.Errorf(codes.NotFound, "user with id %d not found", userId)
 		}
 		return nil, status.Errorf(codes.Internal, "error while deleting user: %s", err)
+	}
+	err = redis.DeleteTokenByUserId(ctx, uint(userId))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while deleting token: %v", err)
 	}
 	return &pb.CommonResponse{
 		Message: "Delete user successfully",

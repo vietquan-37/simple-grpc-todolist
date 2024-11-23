@@ -64,7 +64,10 @@ func (server *Server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Logi
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error while generating token: %v", err)
 	}
-
+	err = redis.SaveToken(ctx, user.ID, refreshToken, time.Hour*5)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while saving token to redis: %v", err)
+	}
 	rsp := &pb.LoginResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
@@ -72,27 +75,25 @@ func (server *Server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Logi
 	return rsp, nil
 }
 func (server *Server) Logout(ctx context.Context, req *pb.TokenRequest) (*pb.CommonResponse, error) {
-	err := redis.SaveTokenToBlackList(ctx, req.RefreshToken, time.Hour*24)
+	userId, _, err := GetFromCtx(ctx)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error while blacklisting token: %v", err)
+		return nil, status.Errorf(codes.Internal, "error while getting id from ctx: %v", err)
+	}
+	err = redis.DeleteTokenByUserId(ctx, uint(userId))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error while deleting token: %v", err)
 	}
 	return &pb.CommonResponse{
 		Message: "Logout successfully",
 	}, nil
 }
+
 func (server *Server) RefreshToken(ctx context.Context, req *pb.TokenRequest) (*pb.RefreshTokenResponse, error) {
 
 	refreshToken := req.GetRefreshToken()
 	userId, _, err := server.Token.ValidateToken(ctx, refreshToken)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "error while validating token: %v", err)
-	}
-	ok, err := redis.IsTokenInBlackList(ctx, req.GetRefreshToken())
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error while retrieving token from cache: %v", err)
-	}
-	if ok {
-		return nil, status.Error(codes.Unauthenticated, "token is revoked")
 	}
 	idInt, err := strconv.Atoi(userId)
 	if err != nil {
